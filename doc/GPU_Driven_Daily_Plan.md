@@ -19,35 +19,45 @@
 - [ ] 画出 Vulkan 对象关系图：Instance → PhysicalDevice → Device → Queue → CommandBuffer
 
 **下午（动手 2h）：**
-- [ ] 安装 Android Studio + NDK (r25+)
+- [x] 安装 Android Studio + NDK (r25+)
 - [ ] 安装 Vulkan SDK（LunarG）
-- [ ] Clone Filament 仓库：`git clone https://github.com/google/filament.git`
-- [ ] 阅读 Filament 的 `README.md` 和 `BUILDING.md`
+  - 已安装 `vulkan-loader / vulkan-tools / vulkan-validationlayers`，LunarG SDK 需图形安装器完成最后一步
+- [x] Clone Filament 仓库：`git clone https://github.com/google/filament.git`
+- [x] 阅读 Filament 的 `README.md` 和 `BUILDING.md`
 
-**产出：** 环境就绪，能编译 Filament
+**产出：** 环境就绪，能编译 Filament（已用 `./build.sh -c -p desktop release matc` 验证通过）
 
 ---
 
 ### Day 2 — 编译运行 Filament
 
 **上午（动手 2h）：**
-- [ ] 按照 Filament 文档在 macOS 上编译 Desktop 版本
+- [x] 按照 Filament 文档在 macOS 上编译 Desktop 版本
   ```bash
   cd filament
   ./build.sh -p desktop release
   ```
-- [ ] 运行 Filament 自带的 sample-gltf-viewer
-- [ ] 如果编译出错，记录问题并解决
+- [x] 运行 Filament 自带的 sample-gltf-viewer
+- [x] 如果编译出错，记录问题并解决
+  - 本轮 `./build.sh -p desktop release` 编译成功（`exit_code: 0`），无阻塞错误
+  - `gltf_viewer` 已通过 `./out/cmake-release/samples/gltf_viewer -a vulkan` 启动
 
 **下午（动手 2h）：**
-- [ ] 编译 Android 版本（需要 Android SDK/NDK）
+- [x] 编译 Android 版本（需要 Android SDK/NDK）
   ```bash
-  ./build.sh -p android release
+  cd filament
+  # 当前 Filament 要求 NDK 29（见 build/common/versions），需 sdkmanager 安装 ndk;29.0.14206865
+  # 常见 64 位真机可只编 arm64 以省时间：
+  ./build.sh -p android release -q arm64-v8a
+  # 全 ABI 则去掉 -q arm64-v8a（耗时明显更长）
   ```
 - [ ] 在 Android 真机上运行 Filament 的 sample app
+  - 已生成 APK：`filament/android/samples/sample-hello-triangle/build/outputs/apk/release/sample-hello-triangle-release-unsigned.apk`（由 `./build.sh -p android -q arm64-v8a -k sample-hello-triangle release` 产出）
+  - 接上真机并开启 USB 调试后：`export PATH="$HOME/Library/Android/sdk/platform-tools:$PATH"` → `adb install -r <上述 apk 路径>`
 - [ ] 用 `adb logcat` 确认跑的是 Vulkan 后端（搜索 "Vulkan" 关键字）
+  - 示例：`adb logcat | grep -i -E 'Vulkan|Filament|FEngine'`（或先 `adb shell pidof com.google.android.filament.hellotriangle` 再按 PID 过滤）
 
-**产出：** Filament Desktop + Android 双端运行成功
+**产出：** Filament Desktop + Android 双端运行成功（真机安装与 logcat 待设备连接后完成）
 
 ---
 
@@ -84,6 +94,8 @@
 - [ ] 记录 Filament 对每种 Attachment 的 load/store 策略
 
 **产出：** 深入理解 TBDR 原理，知道为什么移动端需要特殊优化
+
+**延伸阅读：** [TBDR_Notes.md](./TBDR_Notes.md)（Binning、全流程、并行与执行效率讨论纪要）
 
 ---
 
@@ -584,6 +596,10 @@
 - [ ] 回顾 30 天学到的所有知识，查漏补缺
 
 **产出：** 完整的项目文档 + 可运行的 GPU Driven 渲染管线
+
+---
+
+**TBDR 讨论纪要（Binning、全流程、并行、执行效率）** 已单独成文，见：[TBDR_Notes.md](./TBDR_Notes.md)。
 
 ---
 
