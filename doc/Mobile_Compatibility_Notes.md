@@ -30,19 +30,41 @@ GPU Driven 中 SSBO 承担：Scene Buffer（物体数据）、Indirect Buffer（
 
 ---
 
-### 问题一：SSBO 读写走主存，不享受 Tile Memory
+### 问题一：SSBO 每次读写走 DRAM，与 On-Chip Tile Memory 是两套独立系统
 
-TBDR 的核心优化是让 Color/Depth Attachment 留在 On-Chip Tile Memory，
-但 **SSBO 的地址在 Shader 运行时才确定**，GPU 无法预取到 On-Chip，每次访问都直接打 DRAM：
+**重要澄清**：SSBO 不会让 On-Chip Tile Memory 失效，两套系统完全独立互不干扰。
 
 ```
-IMR（PC 独显）：  SSBO 读写 → L2 Cache → 影响有限
-TBDR（移动端）：  SSBO 读写 → DRAM    → 每次都消耗带宽
+On-Chip Tile Memory（TBDR 专用）       SSBO（主存路径）
+│                                       │
+├─ 存：Color / Depth / Stencil         ├─ 存：Scene Buffer、Indirect Buffer 等
+├─ 生命周期：一个 Tile 的 RenderPass   ├─ 生命周期：整帧甚至跨帧
+└─ 由 loadOp/storeOp/LAZILY 控制       └─ 每次读写走 L1/L2 → DRAM
 ```
+
+同一个 Fragment Shader 可以同时访问两者，互不影响：
+
+```glsl
+// 两条路完全独立
+读 SSBO[i].transform   → 走 DRAM 路径
+写 gl_FragColor        → 写 On-Chip Tile Memory
+```
+
+**真正的问题是**：每次 SSBO 读写本身的逐次 DRAM 带宽消耗。
+
+```
+访问 SSBO[id].transform：
+  → L1 miss（SSBO 不在 Tile Memory）
+  → L2 miss（大 SSBO 很难全部 Cache 住）
+  → 打到 DRAM，取回 64 bytes cache line
+  → 下次访问大概率又 miss
+```
+
+10000 个物体，每个顶点 Shader 读一次 ObjectData（64 bytes），Cache miss 率高时带宽消耗可观。
 
 **应对**：
 - 用 `readonly` 修饰只读 SSBO，驱动可更激进地缓存
-- 合并访问：一次读取尽量取完所需字段，避免多次随机访问同一对象
+- 合并访问：一次读取取完所需字段，避免多次随机访问同一对象
 
 ```glsl
 // 推荐：readonly 告知驱动此 SSBO 不会被写入
@@ -76,22 +98,29 @@ PC（独显）：
 
 ### 问题三：Fragment Shader 写 SSBO 导致 HSR / Early-Z 失效
 
-TBDR 的 Binning Pass 会提前确定每个 Tile 中哪些片元最终可见（HSR），
-只 Shade 可见片元，大幅节省 ALU。
+**注意**：这里是 Fragment Shader **写** SSBO 才有问题，On-Chip Attachment 本身不受影响。
 
-**但**：Fragment Shader 一旦写 SSBO，GPU 无法在 Binning 阶段确认哪些片元"最终存活"，
-HSR 被迫关闭，所有片元都要执行 Shader：
+TBDR 的 Binning Pass 提前确定每个 Tile 哪些片元最终可见（HSR），只 Shade 可见片元：
 
 ```
 正常 TBDR：
-  Binning Pass → 确定可见片元 → 只 Shade 可见片元（节省 ALU）
+  Binning Pass 确定可见性 → 只 Shade 可见片元 → On-Chip 高效运行
 
-Fragment Shader 写 SSBO 后：
-  无法提前 Cull → 所有片元都执行 Shader → HSR 完全失效
+Fragment Shader 写 SSBO 时：
+  GPU：此片元有"副作用"（写了外部内存），即使被遮挡也不能提前丢弃
+       → HSR 无法提前 Cull → 所有片元都要跑完 Shader → ALU 浪费
 ```
 
+**三种情况对比**：
+
+| 场景 | On-Chip Attachment | SSBO 访问代价 | HSR |
+|------|-------------------|-------------|-----|
+| 不用 SSBO | ✅ 正常 | — | ✅ 正常 |
+| Compute 写，Graphics 读 SSBO | ✅ 正常 | 每次读走 DRAM | ✅ 正常 |
+| Fragment Shader 写 SSBO | ✅ 正常（Attachment 不受影响）| 每次走 DRAM | ❌ HSR 失效 |
+
 **应对**：
-- GPU Culling 的 SSBO 写入放在 **Compute Shader**，不放 Fragment Shader
+- GPU Culling 的 SSBO 写入放在 **Compute Shader**，绝不放 Fragment Shader
 - Filament 的设计已经遵守这一原则
 
 ---
