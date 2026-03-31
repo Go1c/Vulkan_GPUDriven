@@ -64,16 +64,16 @@
 ### Day 3 — Vulkan 核心概念：资源与内存
 
 **上午（理论 2h）：**
-- [ ] 阅读 vulkan-tutorial.com：Vertex buffers、Uniform buffers 章节
-- [ ] 理解 Buffer 创建流程：`vkCreateBuffer` → 查询内存需求 → 分配内存 → 绑定
+- [x] 阅读 vulkan-tutorial.com：Vertex buffers、Uniform buffers 章节
+- [x] 理解 Buffer 创建流程：`vkCreateBuffer` → 查询内存需求 → 分配内存 → 绑定
 - [ ] 理解内存类型：DEVICE_LOCAL / HOST_VISIBLE / LAZILY_ALLOCATED
 - [ ] 阅读 [VMA 文档](https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/) 快速入门章节
 
 **下午（代码阅读 2h）：**
-- [ ] 打开 Filament 源码 `backend/src/vulkan/`
-- [ ] 阅读 `VulkanMemory.h/.cpp` — 看 Filament 如何集成 VMA
-- [ ] 搜索 `LAZILY_ALLOCATED` 关键字 — 看在哪里使用了移动端专用内存
-- [ ] 做笔记：Filament 的内存管理策略
+- [x] 打开 Filament 源码 `backend/src/vulkan/`
+- [x] 阅读 `VulkanMemory.h/.cpp` — 看 Filament 如何集成 VMA
+- [x] 搜索 `LAZILY_ALLOCATED` 关键字 — 看在哪里使用了移动端专用内存
+- [x] 做笔记：Filament 的内存管理策略
 
 **产出：** 理解 Vulkan 内存模型，读懂 Filament 内存管理代码
 
