@@ -82,16 +82,16 @@
 ### Day 4 — TBDR 架构深度理解
 
 **上午（理论 2.5h）：**
-- [ ] 阅读 [ARM Mali Best Practices](https://developer.arm.com/documentation/101897/latest) 前 5 章
+- [x] 阅读 [ARM Mali Best Practices](https://developer.arm.com/documentation/101897/latest) 前 5 章
   - 重点：Tile-Based Rendering 章节
   - 重点：Bandwidth 章节
-- [ ] 理解 TBDR 两阶段流水线（Binning + Rendering）
-- [ ] 画出 TBDR vs IMR 对比示意图
+- [x] 理解 TBDR 两阶段流水线（Binning + Rendering）
+- [x] 画出 TBDR vs IMR 对比示意图
 
 **下午（理论 + 代码 1.5h）：**
-- [ ] 阅读 Khronos 官方 [Vulkan Mobile Best Practices](https://github.com/KhronosGroup/Vulkan-Samples/blob/main/samples/performance/render_passes/README.md)
-- [ ] 在 Filament 源码中搜索 `loadOp` 和 `storeOp`
-- [ ] 记录 Filament 对每种 Attachment 的 load/store 策略
+- [x] 阅读 Khronos 官方 [Vulkan Mobile Best Practices](https://github.com/KhronosGroup/Vulkan-Samples/blob/main/samples/performance/render_passes/README.md)
+- [x] 在 Filament 源码中搜索 `loadOp` 和 `storeOp`
+- [x] 记录 Filament 对每种 Attachment 的 load/store 策略
 
 **产出：** 深入理解 TBDR 原理，知道为什么移动端需要特殊优化
 
