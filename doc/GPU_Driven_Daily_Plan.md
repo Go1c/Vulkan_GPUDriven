@@ -102,16 +102,16 @@
 ### Day 5 — RenderPass 与 Subpass
 
 **上午（理论 1.5h）：**
-- [ ] 阅读 vulkan-tutorial.com：Render passes 章节
-- [ ] 理解 VkRenderPass 结构：Attachment Description + Subpass Description + Dependency
-- [ ] 理解 Subpass 如何在 TBDR 上避免主存读写
+- [x] 阅读 vulkan-tutorial.com：Render passes 章节
+- [x] 理解 VkRenderPass 结构：Attachment Description + Subpass Description + Dependency
+- [x] 理解 Subpass 如何在 TBDR 上避免主存读写
 
 **下午（代码阅读 2.5h）：**
-- [ ] 阅读 Filament `VulkanDriver.cpp` 中 `beginRenderPass()` 实现
-- [ ] 追踪一个完整的 RenderPass 创建流程
-- [ ] 看 Filament 是否使用了多 Subpass
-- [ ] 如果没有用多 Subpass，思考为什么（兼容性？复杂度？）
-- [ ] 阅读 `VulkanRenderTarget.h/.cpp`
+- [x] 阅读 Filament `VulkanDriver.cpp` 中 `beginRenderPass()` 实现
+- [x] 追踪一个完整的 RenderPass 创建流程
+- [x] 看 Filament 是否使用了多 Subpass
+- [x] 如果没有用多 Subpass，思考为什么（兼容性？复杂度？）
+- [x] 阅读 `VulkanRenderTarget.h/.cpp`（实际在 VulkanHandles.h/cpp 中）
 
 **产出：** 理解 Filament 的 RenderPass 设计，评估 Subpass 使用现状
 
